@@ -793,8 +793,8 @@ AWS-Specialist executa:
     const grid = document.getElementById('agents-grid');
 
     cards.forEach(card => {
+      const agentName = card.getAttribute('data-agent');
       card.addEventListener('click', () => {
-        const agentName = card.getAttribute('data-agent');
         showDetail(agentName);
       });
     });
@@ -816,8 +816,10 @@ AWS-Specialist executa:
         section.classList.remove('active');
       });
       grid.style.display = 'grid';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelector('.hero').scrollIntoView({ behavior: 'smooth' });
     }
+
+    showDetail('orchestrator');
   </script>
 </body>
 </html>

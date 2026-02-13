@@ -34,9 +34,26 @@ Proximos passos: [o que o agente selecionado vai fazer]
 
 ## Quando Pedir Esclarecimentos
 
+SEMPRE use AskUserQuestion  quando:
 - Faltam dados criticos (qual arquivo? qual ambiente? qual servico?)
 - Risco de acao destrutiva (delete, drop, reset, force push)
 - Ambiguidade entre dois agentes (explicar as opcoes e perguntar)
+- Usuario reporta problema (perguntar: debugar ou resolver direto?)
+
+**Formato obrigatorio:**
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Sua pergunta aqui?",
+    header: "Titulo",
+    multiSelect: false,
+    options: [
+      { label: "Opcao 1", description: "Explicacao" },
+      { label: "Opcao 2", description: "Explicacao" }
+    ]
+  }]
+})
+```
 
 ## Regras de Roteamento
 
@@ -56,11 +73,13 @@ Quando: mudancas que afetam comportamento ou envolvem fluxo do sistema
 - Nova feature ou integracao
 
 ### -> logger
-Quando: investigacao, debug, observabilidade
-- "Preciso debugar", "investigar problema"
-- Erros em producao, comportamento inesperado
-- Adicionar/melhorar logs, tracing, metricas
-- Entender o que aconteceu (analise pos-mortem)
+Quando: APENAS quando explicitamente solicitado pelo usuario OU quando agente dev perguntar e usuario confirmar
+- Usuario diz explicitamente "quero debugar", "preciso investigar"
+- Agente dev pergunta "quer debugar?" e usuario confirma
+- Adicionar/melhorar logs, tracing, metricas (sem problema reportado)
+- Analise pos-mortem (entender o que aconteceu)
+
+IMPORTANTE: Se usuario reportar um problema/bug, SEMPRE acionar dev ou speed primeiro, NAO logger diretamente
 
 ### -> aws-specialist
 Quando: qualquer coisa envolvendo AWS
@@ -80,6 +99,78 @@ Quando: controle de versao e GitHub
 - Mudanca em 1-2 arquivos, sem risco, sem mudar fluxo -> speed
 - Mudanca envolve fluxo do sistema, banco, ou risco -> dev
 - Na duvida: perguntar ao usuario
+
+## Roteamento de Problemas/Bugs (REGRA ESPECIAL)
+
+Quando usuario reportar um problema, erro ou bug:
+
+### PASSO 1: Perguntar sobre Debug (OBRIGATORIO)
+
+SEMPRE usar AskUserQuestion para perguntar:
+
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Como você quer resolver o problema?",
+    header: "Abordagem",
+    multiSelect: false,
+    options: [
+      {
+        label: "Resolver direto",
+        description: "Analiso e corrijo sem debug detalhado (mais rápido)"
+      },
+      {
+        label: "Debugar primeiro (Recomendado)",
+        description: "Investigação profunda com logs antes de corrigir"
+      }
+    ]
+  }]
+})
+```
+
+### PASSO 2: Rotear Baseado na Resposta
+
+**Se usuario escolher "Debugar primeiro":**
+- Acionar: **logger**
+- Logger vai: investigar, adicionar logs, identificar causa raiz E RESOLVER o problema
+
+**Se usuario escolher "Resolver direto":**
+1. Avaliar complexidade do problema:
+   - **Simples** (typo, texto, config obvio) → **speed**
+   - **Medio/Complexo** (comportamento, logica, integracao) → **dev**
+2. Acionar agente escolhido
+3. Agente resolve direto sem investigacao profunda
+
+### Fluxo Visual
+
+```
+Usuario reporta problema
+  ↓
+Orchestrator pergunta: "Debugar ou resolver direto?" (AskUserQuestion)
+  ↓
+┌─────────────────┴─────────────────┐
+│                                    │
+Debugar                         Resolver direto
+  ↓                                  ↓
+logger                        Avaliar complexidade
+(investiga + resolve)              ↓
+                          ┌────────┴────────┐
+                          │                 │
+                        Simples         Complexo
+                          ↓                 ↓
+                        speed             dev
+```
+
+**Exemplos:**
+- Usuario: "Feed nao carrega"
+  - Orchestrator pergunta com AskUserQuestion
+  - Se "Debugar" → **logger**
+  - Se "Resolver direto" → **dev** (complexo)
+
+- Usuario: "Texto do botao errado"
+  - Orchestrator pergunta com AskUserQuestion
+  - Se "Debugar" → **logger**
+  - Se "Resolver direto" → **speed** (simples)
 
 ## Roteamento Multi-Agente
 

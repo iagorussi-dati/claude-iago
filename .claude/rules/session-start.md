@@ -1,9 +1,9 @@
 # Inicio de Sessao
 
-ANTES de executar qualquer tarefa, SEMPRE fazer estas perguntas ao usuario:
+ANTES de executar qualquer tarefa, fazer estas perguntas ao usuario:
 
-1. **AWS Profile**: Qual profile da AWS vamos utilizar hoje? (listar disponiveis com `aws configure list-profiles` se necessario)
-2. **Tarefa principal**: Qual vai ser a tarefa principal de hoje?
+1. **AWS Profile**: Qual profile da AWS vamos utilizar hoje? (listar disponiveis se necessario)
+2. **Tarefa principal**: Confirmar qual vai ser a tarefa principal  
 3. **Branch**: Quer criar uma branch para essa tarefa?
 
 ## Apos as respostas
@@ -18,3 +18,8 @@ ANTES de executar qualquer tarefa, SEMPRE fazer estas perguntas ao usuario:
 - NAO assumir respostas padrao
 - Se o usuario disser que nao precisa de AWS hoje, nao perguntar profile
 - Se o usuario disser que nao quer branch, commitar direto na branch atual (sem PR no final)
+
+## Uso de AskUserQuestion
+
+Se houver **opções definidas** (ex: lista de profiles disponiveis), usar AskUserQuestion para interface interativa.
+Se for pergunta aberta, texto simples é OK.

@@ -10,6 +10,42 @@ allowed-tools: Read, Grep, Edit
 
 iOS e Android NAO tem console acessivel. Todo log de debug DEVE usar `debugLog()` de `src/sync/debug-log.ts` para aparecer na tela de debug do app (`app/debug-iphone.tsx`).
 
+## Analise de Fluxo ANTES de Adicionar Logs (OBRIGATORIO)
+
+Quando o usuario reportar um problema, SEMPRE:
+
+1. **Identificar o fluxo completo** onde o problema acontece
+2. **Mapear todos os componentes envolvidos** (storage, sync, feed, auth, etc)
+3. **Fazer perguntas contextuais** para entender exatamente onde adicionar logs
+4. **Oferecer opcao "Nao sei"** - se usuario nao souber, investigar automaticamente
+
+### Exemplo de Analise de Fluxo:
+
+**Usuario reporta: "Dados nao estao sincronizando"**
+
+Analise do fluxo:
+```
+Usuario completa quiz
+  ↓
+[storage] save local (SQLite/WebMock)
+  ↓
+[queue] enqueue para sync
+  ↓
+[sync] processar fila
+  ↓
+[network] push para AppSync
+  ↓
+[sync] confirmar sucesso
+```
+
+Perguntas contextuais:
+1. "Os dados aparecem localmente mas nao sobem pra nuvem, ou nao salvam nem localmente?"
+   - [Local sim, nuvem nao], [Nao salvam], [Nao sei]
+2. "Qual plataforma?" → [Mobile], [Web]
+3. Se "Nao sei": Adicionar logs em TODOS os pontos do fluxo automaticamente
+
+Resultado: Adicionar `debugLog()` em cada etapa do fluxo para identificar onde falha.
+
 ### Sistema existente no projeto
 
 ```typescript
