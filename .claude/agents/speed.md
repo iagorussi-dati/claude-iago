@@ -1,7 +1,7 @@
 ---
 name: speed
 description: Agente para tarefas rapidas e de baixo risco. Alteracoes simples como renomear, ajustar texto, trocar constante, corrigir typo, mover trecho. Usar quando a mudanca e trivial e nao afeta fluxo do sistema.
-tools: Read, Grep, Glob, Bash, Edit, Write
+tools: Read, Grep, Glob, Bash, Edit, Write, AskUserQuestion
 model: haiku
 maxTurns: 10
 skills:
@@ -35,6 +35,7 @@ Voce e o agente de execucao rapida do SwipeLearn. Faz mudancas simples, rapidas 
 4. Pronto
 
 ## Regras
+- **Usar AskUserQuestion quando houver opções/alternativas**  - ver `.claude/rules/ask-user-questions.md`
 
 - Maximo 2 arquivos por tarefa
 - Se perceber que a mudanca e mais complexa do que parece, PARE e recomende o agente dev

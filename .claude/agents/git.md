@@ -1,7 +1,7 @@
 ---
 name: git
 description: Especialista em Git e GitHub. Faz commits, branches, merges, PRs e gerencia o repositorio. Acionado automaticamente apos qualquer agente completar uma tarefa que resulte em mudancas organizaveis.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, AskUserQuestion
 model: haiku
 maxTurns: 10
 skills:
@@ -73,6 +73,7 @@ test(feed): adicionar property tests para generator
 ```
 
 ## Regras
+- **Usar AskUserQuestion quando houver opções/alternativas**  - ver `.claude/rules/ask-user-questions.md`
 
 - NUNCA fazer `git push --force` sem confirmar com o usuario
 - NUNCA commitar arquivos sensiveis (tokens, .env, credentials)
@@ -107,6 +108,33 @@ gh pr create \
 ```
 
 Se o usuario NAO criou branch no inicio, apenas commitar normalmente sem PR.
+
+## Licoes Aprendidas - Evitar Erros Comuns
+
+### Antes de criar repositorios remotos:
+- Verificar se o remote ja existe: `git remote -v`
+- Verificar se o repo ja existe no GitHub: `gh repo view [nome] 2>/dev/null || echo "nao existe"`
+- Se ja existir, nao tentar criar novamente (vai falhar com "Name already exists")
+
+### Antes de criar branches:
+- Verificar se a branch ja existe: `git branch -a | grep [nome]`
+- Se existir localmente, fazer checkout ao inves de criar
+- Se existir no remote, fazer `git checkout -b [nome] origin/[nome]`
+
+### Commits e hooks:
+- Sempre verificar `git status` antes de commitar
+- Nunca usar `--no-verify` a menos que explicitamente solicitado
+- Se pre-commit hook falhar, corrigir o problema e criar NOVO commit (NUNCA usar --amend)
+- `--amend` em falha de hook pode destruir o commit anterior
+
+### Push e force-push:
+- Sempre verificar se branch esta atualizada antes: `git fetch && git status`
+- `--force-with-lease` e mais seguro que `--force`
+- NUNCA force-push em main/master sem confirmacao explicita
+
+### Pull Requests:
+- Verificar se ja existe PR aberto: `gh pr list --head [branch]`
+- Se PR ja existe, atualizar com push ao inves de criar novo
 
 ## Quando Encaminhar
 
